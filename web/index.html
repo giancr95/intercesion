@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intercesión — Mis Oraciones</title>
+  <meta name="description" content="Gestiona tus intenciones de oración con Intercesión." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #020617;
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    input, textarea { font-family: inherit; outline: none; border: none; }
+
+    /* ─── App Shell ─── */
+    #app { max-width: 520px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; }
+
+    /* ─── Top Bar ─── */
+    .topbar {
+      padding: 16px 20px 12px;
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid #1e293b;
+      background: #020617;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar h1 { font-size: 18px; font-weight: 700; color: #f8fafc; }
+
+    /* ─── Tab Bar ─── */
+    .tabbar {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 520px;
+      display: flex; background: #020617;
+      border-top: 1px solid #1e293b;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .tabbar button {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 0 10px; background: transparent; color: #64748b;
+      font-size: 11px; font-weight: 600; transition: color 0.2s;
+    }
+    .tabbar button.active { color: #fbbf24; }
+    .tabbar button svg { width: 22px; height: 22px; }
+
+    /* ─── Pages ─── */
+    .page { display: none; flex: 1; padding-bottom: 72px; }
+    .page.active { display: flex; flex-direction: column; }
+
+    /* ─── Auth Page ─── */
+    .auth-page { display: none; flex: 1; justify-content: center; align-items: center; padding: 24px; }
+    .auth-page.active { display: flex; flex-direction: column; }
+    .auth-card { width: 100%; max-width: 400px; }
+    .auth-logo {
+      width: 80px; height: 80px; border-radius: 50%; background: #1e293b;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+    }
+    .auth-title { text-align: center; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+    .auth-subtitle { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 32px; }
+    .auth-input-group {
+      display: flex; align-items: center; background: #0f172a;
+      border-radius: 12px; border: 1px solid #1e293b; padding: 0 16px; margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    .auth-input-group:focus-within { border-color: #fbbf24; }
+    .auth-input-group svg { color: #64748b; width: 18px; height: 18px; flex-shrink: 0; }
+    .auth-input-group input {
+      flex: 1; background: transparent; color: #f1f5f9; font-size: 16px;
+      padding: 16px 12px;
+    }
+    .auth-input-group input::placeholder { color: #475569; }
+    .auth-btn {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: #f59e0b; color: #020617; border-radius: 12px; padding: 16px;
+      font-size: 16px; font-weight: 700; margin-top: 12px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .auth-btn:hover { background: #d97706; }
+    .auth-btn:active { transform: scale(0.98); }
+    .auth-btn:disabled { background: #78350f; cursor: not-allowed; }
+    .auth-toggle { text-align: center; margin-top: 16px; color: #64748b; font-size: 14px; background: transparent; }
+    .auth-toggle span { color: #fbbf24; font-weight: 600; cursor: pointer; }
+    .auth-error { color: #f87171; text-align: center; font-size: 13px; margin-top: 8px; min-height: 20px; }
+
+    /* ─── View Mode Tabs ─── */
+    .view-tabs {
+      display: flex; padding: 8px 16px 4px; gap: 0;
+    }
+    .view-tabs button {
+      flex: 1; padding: 10px 0; text-align: center; background: transparent;
+      color: #64748b; font-size: 13px; font-weight: 500;
+      border-bottom: 2px solid #1e293b; transition: all 0.2s;
+    }
+    .view-tabs button.active { color: #fbbf24; font-weight: 700; border-bottom-color: #fbbf24; }
+
+    /* ─── Count ─── */
+    .count-bar { padding: 8px 20px 4px; color: #64748b; font-size: 14px; }
+
+    /* ─── Prayer List ─── */
+    .prayer-list { flex: 1; overflow-y: auto; padding: 4px 16px 16px; }
+    .section-header { padding: 16px 4px 8px; color: #fbbf24; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
+
+    /* ─── Prayer Card ─── */
+    .prayer-card {
+      background: #0f172a; border-radius: 16px; padding: 18px; margin-bottom: 12px;
+      border: 1px solid #1e293b;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .prayer-card:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .prayer-text { color: #f1f5f9; font-size: 16px; font-weight: 500; margin-bottom: 10px; line-height: 1.4; }
+    .prayer-intercesor { color: #a78bfa; font-size: 12px; font-weight: 600; font-style: italic; margin-bottom: 10px; }
+    .badge-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.5px; cursor: pointer; transition: filter 0.2s;
+    }
+    .status-badge:hover { filter: brightness(1.2); }
+    .status-badge svg { width: 14px; height: 14px; }
+    .status-badge .chevron { width: 12px; height: 12px; }
+    .category-badge {
+      display: inline-block; padding: 5px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+    }
+
+    /* ─── FAB ─── */
+    .fab {
+      position: fixed; bottom: 90px; right: calc(50% - 240px);
+      width: 60px; height: 60px; border-radius: 30px;
+      background: #f59e0b; color: #020617;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+      transition: background 0.2s, transform 0.15s; z-index: 80;
+    }
+    .fab:hover { background: #d97706; transform: scale(1.05); }
+    .fab:active { transform: scale(0.95); }
+    .fab svg { width: 28px; height: 28px; stroke-width: 3; }
+    @media (max-width: 520px) { .fab { right: 20px; } }
+
+    /* ─── Modal Overlay ─── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      z-index: 200; justify-content: flex-end; align-items: center;
+      animation: fadeIn 0.2s;
+    }
+    .modal-overlay.open { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    /* ─── Add Prayer Modal ─── */
+    .add-modal {
+      background: #0f172a; border-top-left-radius: 24px; border-top-right-radius: 24px;
+      padding: 20px; width: 100%; max-width: 520px; max-height: 85vh; overflow-y: auto;
+      border-top: 1px solid #1e293b; animation: slideUp 0.3s ease-out;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-header h2 { font-size: 20px; font-weight: 700; }
+    .close-btn {
+      width: 36px; height: 36px; border-radius: 18px; background: #1e293b;
+      display: flex; align-items: center; justify-content: center; color: #94a3b8;
+      transition: background 0.2s;
+    }
+    .close-btn:hover { background: #334155; }
+    .prayer-textarea {
+      width: 100%; background: #020617; border-radius: 12px; padding: 14px;
+      color: #f1f5f9; font-size: 16px; min-height: 80px; resize: vertical;
+      border: 1px solid #1e293b; transition: border-color 0.2s;
+    }
+    .prayer-textarea::placeholder { color: #475569; }
+    .prayer-textarea:focus { border-color: #fbbf24; }
+    .field-label { color: #94a3b8; font-size: 13px; font-weight: 600; margin: 14px 0 8px; }
+    .category-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .category-chip {
+      padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      background: #1e293b; color: #94a3b8; border: 1px solid #334155;
+      transition: all 0.2s;
+    }
+    .category-chip.active { font-weight: 700; }
+
+    /* Intercesor search */
+    .intercesor-search {
+      display: flex; align-items: center; background: #020617; border-radius: 12px;
+      border: 1px solid #1e293b; padding: 0 12px; transition: border-color 0.2s;
+    }
+    .intercesor-search:focus-within { border-color: #fbbf24; }
+    .intercesor-search svg { color: #475569; width: 16px; height: 16px; flex-shrink: 0; }
+    .intercesor-search input { flex: 1; background: transparent; color: #f1f5f9; font-size: 14px; padding: 12px 8px; }
+    .intercesor-search input::placeholder { color: #475569; }
+    .intercesor-clear { background: transparent; color: #64748b; padding: 4px; display: flex; }
+    .intercesor-dropdown {
+      background: #020617; border: 1px solid #1e293b; border-radius: 12px;
+      margin-top: 4px; max-height: 150px; overflow-y: auto; display: none;
+    }
+    .intercesor-dropdown.open { display: block; }
+    .intercesor-option {
+      padding: 10px 14px; color: #e2e8f0; font-size: 14px; background: transparent;
+      width: 100%; text-align: left; border-bottom: 1px solid #0f172a;
+      transition: background 0.15s;
+    }
+    .intercesor-option:hover { background: #1e293b; }
+    .submit-btn {
+      width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700;
+      background: #f59e0b; color: #020617; margin-top: 14px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .submit-btn:hover { background: #d97706; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; }
+
+    /* ─── Status Modal ─── */
+    .status-modal {
+      background: #0f172a; border-radius: 16px; padding: 20px; width: 80%; max-width: 340px;
+      border: 1px solid #1e293b; animation: fadeIn 0.2s;
+    }
+    .status-modal-overlay { align-items: center; justify-content: center; }
+    .status-modal h2 { text-align: center; font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .status-option {
+      display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+      border-radius: 12px; margin-bottom: 4px; background: transparent;
+      width: 100%; text-align: left; font-size: 16px; font-weight: 500; color: #94a3b8;
+      transition: background 0.15s;
+    }
+    .status-option:hover { filter: brightness(1.15); }
+    .status-option.active { font-weight: 700; }
+    .status-option svg { width: 18px; height: 18px; }
+    .status-option .check { margin-left: auto; }
+
+    /* ─── Profile ─── */
+    .profile-content { padding: 20px; text-align: center; }
+    .profile-avatar {
+      width: 96px; height: 96px; border-radius: 48px; background: #1e293b;
+      display: flex; align-items: center; justify-content: center; margin: 20px auto 16px;
+    }
+    .profile-name-row {
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;
+    }
+    .profile-name { font-size: 22px; font-weight: 700; }
+    .profile-edit-btn { background: transparent; color: #64748b; display: flex; padding: 4px; }
+    .profile-email { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+    .profile-name-edit {
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;
+    }
+    .profile-name-input {
+      background: transparent; color: #f8fafc; font-size: 20px; font-weight: 700;
+      border: none; border-bottom: 2px solid #fbbf24; padding: 4px 8px;
+      text-align: center; min-width: 150px;
+    }
+    .profile-name-save {
+      width: 36px; height: 36px; border-radius: 18px; background: #166534;
+      display: flex; align-items: center; justify-content: center; color: #4ade80;
+    }
+    .signout-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: #991b1b; color: #fecaca; border-radius: 12px; padding: 16px;
+      font-size: 16px; font-weight: 700; width: 100%;
+      transition: background 0.2s;
+    }
+    .signout-btn:hover { background: #7f1d1d; }
+    .version-text { color: #334155; font-size: 12px; text-align: center; margin-top: 40px; }
+
+    /* ─── Upper Room ─── */
+    .upper-room-content { padding: 20px; text-align: center; }
+    .upper-room-icon {
+      width: 100px; height: 100px; border-radius: 50px; background: #1e293b;
+      display: flex; align-items: center; justify-content: center; margin: 40px auto 24px;
+    }
+    .upper-room-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .upper-room-desc { color: #94a3b8; font-size: 15px; line-height: 1.5; padding: 0 20px; margin-bottom: 40px; }
+    .feature-card {
+      background: #0f172a; border-radius: 16px; padding: 20px; border: 1px solid #1e293b;
+      display: flex; align-items: center; gap: 16px; text-align: left; margin-bottom: 16px;
+    }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 24px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .feature-card h3 { color: #f1f5f9; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .feature-card p { color: #64748b; font-size: 13px; line-height: 1.4; }
+    .coming-soon {
+      display: inline-block; background: #1e293b; padding: 10px 20px; border-radius: 20px;
+      color: #94a3b8; font-size: 13px; font-weight: 600; margin-top: 40px;
+    }
+
+    /* Empty state */
+    .empty-state { text-align: center; margin-top: 80px; color: #475569; }
+    .empty-state svg { margin-bottom: 16px; color: #334155; }
+    .empty-state p { font-size: 16px; line-height: 1.5; }
+
+    /* Loading spinner */
+    .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid #1e293b; border-top-color: #fbbf24; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-center { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; flex: 1; color: #64748b; font-size: 14px; }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 520px) { #app { max-width: 100%; } .tabbar { max-width: 100%; } }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ═══ Auth Screen ═══ -->
+  <div id="auth-screen" class="auth-page active">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+      </div>
+      <h1 class="auth-title">Intercesión</h1>
+      <p class="auth-subtitle" id="auth-subtitle">Inicia sesión para continuar</p>
+      <div class="auth-input-group">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <input type="email" id="auth-email" placeholder="Correo electrónico" autocomplete="email" />
+      </div>
+      <div class="auth-input-group">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="auth-password" placeholder="Contraseña" autocomplete="current-password" />
+      </div>
+      <button class="auth-btn" id="auth-btn" onclick="handleAuth()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span id="auth-btn-text">Iniciar Sesión</span>
+      </button>
+      <p class="auth-error" id="auth-error"></p>
+      <p class="auth-toggle">
+        <span id="auth-toggle-prefix">¿No tienes cuenta? </span>
+        <span onclick="toggleAuthMode()" id="auth-toggle-link">Regístrate</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══ Main App ═══ -->
+  <div id="main-app" style="display:none; flex:1; flex-direction:column; min-height:100vh;">
+    <div class="topbar">
+      <h1 id="topbar-title">Mis Oraciones</h1>
+    </div>
+
+    <!-- ─── Prayers Page ─── -->
+    <div id="page-prayers" class="page active">
+      <div class="view-tabs">
+        <button class="active" data-view="todos" onclick="setViewMode('todos')">Todos</button>
+        <button data-view="estado" onclick="setViewMode('estado')">Por Estado</button>
+        <button data-view="intercesor" onclick="setViewMode('intercesor')">Por Intercesor</button>
+      </div>
+      <div class="count-bar" id="count-bar">0 intenciones</div>
+      <div class="prayer-list" id="prayer-list"></div>
+    </div>
+
+    <!-- ─── Upper Room Page ─── -->
+    <div id="page-upper-room" class="page">
+      <div class="upper-room-content">
+        <div class="upper-room-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4-4 4"/><path d="M2 12V8a2 2 0 0 1 2-2h16"/><path d="m6 22-4-4 4-4"/><path d="M22 12v4a2 2 0 0 1-2 2H4"/></svg>
+        </div>
+        <h2 class="upper-room-title">Aposento Alto</h2>
+        <p class="upper-room-desc">Un espacio de oración comunitaria donde puedes compartir tus intenciones con otros creyentes.</p>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#172554;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <h3>Oración en Comunidad</h3>
+            <p>Comparte y ora junto a otros hermanos en la fe.</p>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon" style="background:#422006;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          </div>
+          <div>
+            <h3>Intercesión Grupal</h3>
+            <p>Únete a cadenas de oración por necesidades urgentes.</p>
+          </div>
+        </div>
+        <div class="coming-soon">🚀 Próximamente</div>
+      </div>
+    </div>
+
+    <!-- ─── Profile Page ─── -->
+    <div id="page-profile" class="page">
+      <div class="profile-content">
+        <div class="profile-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        </div>
+        <div id="profile-name-display" class="profile-name-row">
+          <span class="profile-name" id="profile-name-text">Guerrero de Oración</span>
+          <button class="profile-edit-btn" onclick="startEditName()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </button>
+        </div>
+        <div id="profile-name-editor" class="profile-name-edit" style="display:none;">
+          <input type="text" class="profile-name-input" id="profile-name-input" />
+          <button class="profile-name-save" onclick="saveName()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+        <p class="profile-email" id="profile-email"></p>
+        <button class="signout-btn" onclick="handleSignOut()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Cerrar Sesión
+        </button>
+        <p class="version-text">Intercesión v1.0.0 — Web</p>
+      </div>
+    </div>
+
+    <!-- FAB -->
+    <button class="fab" id="fab-btn" onclick="openAddModal()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+
+    <!-- Tab Bar -->
+    <div class="tabbar">
+      <button class="active" data-tab="prayers" onclick="switchTab('prayers')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M12 13V7"/><path d="m9 10 3-3 3 3"/></svg>
+        Mis Oraciones
+      </button>
+      <button data-tab="upper-room" onclick="switchTab('upper-room')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2 4 4-4 4"/><path d="M2 12V8a2 2 0 0 1 2-2h16"/><path d="m6 22-4-4 4-4"/><path d="M22 12v4a2 2 0 0 1-2 2H4"/></svg>
+        Aposento Alto
+      </button>
+      <button data-tab="profile" onclick="switchTab('profile')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        Perfil
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Add Prayer Modal ═══ -->
+<div class="modal-overlay" id="add-modal-overlay" onclick="closeAddModal()">
+  <div class="add-modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Nueva Intención</h2>
+      <button class="close-btn" onclick="closeAddModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <textarea class="prayer-textarea" id="prayer-input" placeholder="Escribe tu intención de oración..."></textarea>
+    <p class="field-label">Categoría</p>
+    <div class="category-chips" id="category-chips"></div>
+    <p class="field-label">Intercesor (opcional)</p>
+    <div class="intercesor-search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="intercesor-input" placeholder="Buscar intercesor..." oninput="filterIntercesors()" onfocus="showIntercesorDropdown()" />
+      <button class="intercesor-clear" id="intercesor-clear" style="display:none;" onclick="clearIntercesor()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="intercesor-dropdown" id="intercesor-dropdown"></div>
+    <button class="submit-btn" id="submit-prayer-btn" onclick="submitPrayer()" disabled>Agregar Oración</button>
+  </div>
+</div>
+
+<!-- ═══ Status Change Modal ═══ -->
+<div class="modal-overlay status-modal-overlay" id="status-modal-overlay" onclick="closeStatusModal()">
+  <div class="status-modal" onclick="event.stopPropagation()">
+    <h2>Cambiar Estado</h2>
+    <div id="status-options"></div>
+  </div>
+</div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ─── Supabase Init ───
+const SUPABASE_URL = 'https://djivvvbphlhcfgqljkyg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaXZ2dmJwaGxoY2ZncWxqa3lnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxMDQ3ODIsImV4cCI6MjA4ODY4MDc4Mn0.4uFBQYz4tDg2h9Bpowrl8TJ9g_VSNqQIdyyrgi8KwW8';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─── Constants ───
+const CATEGORIES = ['Salud', 'Familia', 'Unión', 'Vocación', 'General'];
+const INTERCESORS = [
+  'Sagrado Corazón de Jesús', 'Virgen María', 'San José', 'San Carlo Acutis',
+  'San Miguel Arcángel', 'Santa Teresa de Ávila', 'Santa Teresa de Lisieux (Teresita)',
+  'San Juan Pablo II', 'San Padre Pío', 'Santo Tomás de Aquino', 'San Francisco de Asís',
+  'Santa Rosa de Lima', 'San Ignacio de Loyola', 'Santa Faustina Kowalska',
+  'San Antonio de Padua', 'Santa Mónica', 'San Agustín', 'San Rafael Arcángel',
+  'Santa Guadalupe (Virgen de Guadalupe)', 'San Judas Tadeo',
+];
+const STATUS_LIST = ['Sown', 'In Cultivation', 'Harvested'];
+const statusConfig = {
+  Sown:             { label: 'Sembrada',   color: '#60a5fa', bgColor: '#172554', icon: 'clock' },
+  'In Cultivation': { label: 'En Cultivo', color: '#fbbf24', bgColor: '#422006', icon: 'sparkles' },
+  Harvested:        { label: 'Cosechada',  color: '#34d399', bgColor: '#052e16', icon: 'check-circle' },
+};
+const categoryColors = { Salud: '#f472b6', Familia: '#fb923c', Unión: '#a78bfa', Vocación: '#38bdf8', General: '#94a3b8' };
+
+// ─── State ───
+let currentUser = null;
+let displayName = 'Guerrero de Oración';
+let intentions = [];
+let viewMode = 'todos';
+let selectedCategory = 'General';
+let selectedIntercesor = null;
+let statusChangeItemId = null;
+let isSignUp = false;
+
+// ─── SVG Icon Helpers ───
+function iconSvg(name, size = 14, color = 'currentColor') {
+  const icons = {
+    clock: `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    sparkles: `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`,
+    'check-circle': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    'chevron-down': `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+    sparkles48: `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
+  };
+  return icons[name] || '';
+}
+
+// ─── Auth ───
+async function checkSession() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    await fetchDisplayName();
+    showApp();
+    await loadIntentions();
+  }
+}
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    await fetchDisplayName();
+    showApp();
+    await loadIntentions();
+  } else {
+    currentUser = null;
+    displayName = 'Guerrero de Oración';
+    showAuth();
+  }
+});
+
+async function fetchDisplayName() {
+  if (!currentUser) return;
+  const { data } = await sb.from('users').select('display_name').eq('id', currentUser.id).single();
+  displayName = data?.display_name || 'Guerrero de Oración';
+  document.getElementById('profile-name-text').textContent = displayName;
+  document.getElementById('profile-email').textContent = currentUser.email;
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').classList.add('active');
+  document.getElementById('main-app').style.display = 'none';
+}
+function showApp() {
+  document.getElementById('auth-screen').classList.remove('active');
+  document.getElementById('main-app').style.display = 'flex';
+  document.getElementById('profile-name-text').textContent = displayName;
+  document.getElementById('profile-email').textContent = currentUser?.email || '';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pw = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = '';
+  if (!email || !pw) { errEl.textContent = 'Por favor ingresa tu correo y contraseña.'; return; }
+
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true;
+  document.getElementById('auth-btn-text').textContent = 'Cargando...';
+
+  let result;
+  if (isSignUp) {
+    result = await sb.auth.signUp({ email, password: pw });
+  } else {
+    result = await sb.auth.signInWithPassword({ email, password: pw });
+  }
+
+  btn.disabled = false;
+  document.getElementById('auth-btn-text').textContent = isSignUp ? 'Crear Cuenta' : 'Iniciar Sesión';
+
+  if (result.error) {
+    errEl.textContent = result.error.message;
+  } else if (isSignUp) {
+    errEl.style.color = '#34d399';
+    errEl.textContent = '¡Cuenta creada! Revisa tu correo o inicia sesión.';
+  }
+}
+
+function toggleAuthMode() {
+  isSignUp = !isSignUp;
+  document.getElementById('auth-subtitle').textContent = isSignUp ? 'Crea tu cuenta' : 'Inicia sesión para continuar';
+  document.getElementById('auth-btn-text').textContent = isSignUp ? 'Crear Cuenta' : 'Iniciar Sesión';
+  document.getElementById('auth-toggle-prefix').textContent = isSignUp ? '¿Ya tienes cuenta? ' : '¿No tienes cuenta? ';
+  document.getElementById('auth-toggle-link').textContent = isSignUp ? 'Inicia Sesión' : 'Regístrate';
+  document.getElementById('auth-error').textContent = '';
+}
+
+async function handleSignOut() {
+  await sb.auth.signOut();
+  intentions = [];
+  currentUser = null;
+  showAuth();
+}
+
+// ─── Tabs ───
+function switchTab(tab) {
+  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const titles = { prayers: 'Mis Oraciones', 'upper-room': 'Aposento Alto', profile: 'Perfil' };
+  document.getElementById('topbar-title').textContent = titles[tab];
+  document.getElementById('page-' + tab).classList.add('active');
+  document.getElementById('fab-btn').style.display = tab === 'prayers' ? 'flex' : 'none';
+}
+
+// ─── View Mode ───
+function setViewMode(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.view-tabs button').forEach(b => b.classList.toggle('active', b.dataset.view === mode));
+  renderIntentions();
+}
+
+// ─── Load Intentions ───
+async function loadIntentions() {
+  const list = document.getElementById('prayer-list');
+  list.innerHTML = '<div class="loading-center"><div class="spinner"></div>Cargando intenciones...</div>';
+  const { data, error } = await sb.from('intentions').select('*').order('created_at', { ascending: false });
+  if (error) {
+    list.innerHTML = '<div class="loading-center" style="color:#f87171;">Error al cargar. Revisa tu conexión.</div>';
+    return;
+  }
+  intentions = data || [];
+  renderIntentions();
+}
+
+// ─── Render ───
+function renderIntentions() {
+  const list = document.getElementById('prayer-list');
+  document.getElementById('count-bar').textContent = `${intentions.length} ${intentions.length === 1 ? 'intención' : 'intenciones'}`;
+
+  if (intentions.length === 0) {
+    list.innerHTML = `<div class="empty-state">${iconSvg('sparkles48', 48)}<p>No tienes intenciones de oración aún.<br>Toca el botón + para agregar una.</p></div>`;
+    return;
+  }
+
+  if (viewMode === 'todos') {
+    list.innerHTML = intentions.map(cardHTML).join('');
+  } else {
+    const key = viewMode === 'estado' ? 'status' : 'intercesor';
+    const groups = {};
+    intentions.forEach(i => {
+      let label;
+      if (key === 'status') {
+        label = statusConfig[i.status]?.label || i.status;
+      } else {
+        label = i.intercesor || 'Sin Intercesor';
+      }
+      if (!groups[label]) groups[label] = [];
+      groups[label].push(i);
+    });
+    list.innerHTML = Object.entries(groups).map(([title, items]) =>
+      `<div class="section-header">${title}</div>` + items.map(cardHTML).join('')
+    ).join('');
+  }
+}
+
+function cardHTML(item) {
+  const cfg = statusConfig[item.status] || statusConfig['Sown'];
+  const catColor = categoryColors[item.category || 'General'] || '#94a3b8';
+  const intercesorHTML = item.intercesor ? `<div class="prayer-intercesor">🙏 ${item.intercesor}</div>` : '';
+  const categoryHTML = item.category ? `<span class="category-badge" style="background:${catColor}20;color:${catColor};">${item.category}</span>` : '';
+  return `
+    <div class="prayer-card">
+      <div class="prayer-text">${escapeHtml(item.raw_text)}</div>
+      ${intercesorHTML}
+      <div class="badge-row">
+        <span class="status-badge" style="background:${cfg.bgColor};color:${cfg.color};" onclick="openStatusModal('${item.id}','${item.status}')">
+          ${iconSvg(cfg.icon, 14, cfg.color)}
+          ${cfg.label}
+          ${iconSvg('chevron-down', 12, cfg.color)}
+        </span>
+        ${categoryHTML}
+      </div>
+    </div>`;
+}
+
+function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+// ─── Add Prayer Modal ───
+function openAddModal() {
+  selectedCategory = 'General';
+  selectedIntercesor = null;
+  document.getElementById('prayer-input').value = '';
+  document.getElementById('intercesor-input').value = '';
+  document.getElementById('intercesor-clear').style.display = 'none';
+  document.getElementById('intercesor-dropdown').classList.remove('open');
+  document.getElementById('submit-prayer-btn').disabled = true;
+  renderCategoryChips();
+  document.getElementById('add-modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('prayer-input').focus(), 100);
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal-overlay').classList.remove('open');
+}
+
+function renderCategoryChips() {
+  const container = document.getElementById('category-chips');
+  container.innerHTML = CATEGORIES.map(cat => {
+    const color = categoryColors[cat] || '#94a3b8';
+    const active = cat === selectedCategory;
+    return `<button class="category-chip${active ? ' active' : ''}" style="${active ? `background:${color}30;border-color:${color};color:${color};` : ''}" onclick="selectCategory('${cat}')">${cat}</button>`;
+  }).join('');
+}
+
+function selectCategory(cat) {
+  selectedCategory = cat;
+  renderCategoryChips();
+}
+
+// Intercesor autocomplete
+function filterIntercesors() {
+  const input = document.getElementById('intercesor-input');
+  const q = input.value.toLowerCase();
+  selectedIntercesor = null;
+  document.getElementById('intercesor-clear').style.display = 'none';
+  const filtered = q ? INTERCESORS.filter(i => i.toLowerCase().includes(q)) : INTERCESORS;
+  const dd = document.getElementById('intercesor-dropdown');
+  dd.innerHTML = filtered.map(i => `<button class="intercesor-option" onclick="selectIntercesor('${i.replace(/'/g, "\\'")}')">${i}</button>`).join('');
+  dd.classList.add('open');
+}
+
+function showIntercesorDropdown() {
+  if (selectedIntercesor) return;
+  const dd = document.getElementById('intercesor-dropdown');
+  dd.innerHTML = INTERCESORS.map(i => `<button class="intercesor-option" onclick="selectIntercesor('${i.replace(/'/g, "\\'")}')">${i}</button>`).join('');
+  dd.classList.add('open');
+}
+
+function selectIntercesor(name) {
+  selectedIntercesor = name;
+  document.getElementById('intercesor-input').value = name;
+  document.getElementById('intercesor-dropdown').classList.remove('open');
+  document.getElementById('intercesor-clear').style.display = 'flex';
+}
+
+function clearIntercesor() {
+  selectedIntercesor = null;
+  document.getElementById('intercesor-input').value = '';
+  document.getElementById('intercesor-clear').style.display = 'none';
+}
+
+// Enable/disable submit
+document.addEventListener('input', () => {
+  const btn = document.getElementById('submit-prayer-btn');
+  if (btn) btn.disabled = !document.getElementById('prayer-input')?.value.trim();
+});
+
+async function submitPrayer() {
+  const text = document.getElementById('prayer-input').value.trim();
+  if (!text || !currentUser) return;
+  const btn = document.getElementById('submit-prayer-btn');
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const { error } = await sb.from('intentions').insert({
+    user_id: currentUser.id,
+    raw_text: text,
+    status: 'Sown',
+    is_public: false,
+    category: selectedCategory,
+    intercesor: selectedIntercesor,
+  });
+
+  btn.textContent = 'Agregar Oración';
+  if (error) { alert('Error: ' + error.message); btn.disabled = false; return; }
+  closeAddModal();
+  await loadIntentions();
+}
+
+// ─── Status Modal ───
+function openStatusModal(id, current) {
+  statusChangeItemId = id;
+  const container = document.getElementById('status-options');
+  container.innerHTML = STATUS_LIST.map(s => {
+    const cfg = statusConfig[s];
+    const active = s === current;
+    return `
+      <button class="status-option${active ? ' active' : ''}" style="${active ? `background:${cfg.bgColor};color:${cfg.color};` : ''}" onclick="changeStatus('${s}')">
+        ${iconSvg(cfg.icon, 18, active ? cfg.color : '#94a3b8')}
+        <span style="flex:1;">${cfg.label}</span>
+        ${active ? `<span class="check">${iconSvg('check-circle', 18, cfg.color)}</span>` : ''}
+      </button>`;
+  }).join('');
+  document.getElementById('status-modal-overlay').classList.add('open');
+}
+
+function closeStatusModal() {
+  document.getElementById('status-modal-overlay').classList.remove('open');
+  statusChangeItemId = null;
+}
+
+async function changeStatus(status) {
+  if (!statusChangeItemId) return;
+  closeStatusModal();
+  const { error } = await sb.from('intentions').update({ status }).eq('id', statusChangeItemId);
+  if (error) { alert('Error: ' + error.message); return; }
+  await loadIntentions();
+}
+
+// ─── Profile Name Edit ───
+function startEditName() {
+  document.getElementById('profile-name-input').value = displayName;
+  document.getElementById('profile-name-display').style.display = 'none';
+  document.getElementById('profile-name-editor').style.display = 'flex';
+  document.getElementById('profile-name-input').focus();
+}
+
+async function saveName() {
+  const name = document.getElementById('profile-name-input').value.trim();
+  if (!name || !currentUser) return;
+  const { error } = await sb.from('users').update({ display_name: name }).eq('id', currentUser.id);
+  if (!error) {
+    displayName = name;
+    document.getElementById('profile-name-text').textContent = name;
+  }
+  document.getElementById('profile-name-display').style.display = 'flex';
+  document.getElementById('profile-name-editor').style.display = 'none';
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('intercesor-dropdown');
+  const search = document.querySelector('.intercesor-search');
+  if (dd && search && !search.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.remove('open');
+  }
+});
+
+// Enter key support for auth
+document.getElementById('auth-password').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuth(); });
+document.getElementById('auth-email').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('auth-password').focus(); });
+
+// ─── Init ───
+checkSession();
+</script>
+</body>
+</html>
