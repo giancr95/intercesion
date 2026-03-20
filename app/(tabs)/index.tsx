@@ -238,7 +238,7 @@ function EditPrayerModal({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "padding"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
       >
         <Pressable
@@ -524,7 +524,7 @@ function EditPrayerModal({
                 }}
                 disabled={!text.trim()}
                 style={({ pressed }) => ({
-                  backgroundColor: !text.trim() ? colors.border : pressed ? colors.primaryDark : colors.primary,
+                  backgroundColor: !text.trim() ? colors.chipBg : pressed ? colors.primaryDark : colors.primary,
                   borderRadius: 12,
                   paddingVertical: 16,
                   alignItems: "center",
@@ -532,7 +532,7 @@ function EditPrayerModal({
               >
                 <Text
                   style={{
-                    color: text.trim() ? "#ffffff" : colors.muted,
+                    color: text.trim() ? "#ffffff" : colors.textSecondary,
                     fontSize: 16,
                     fontWeight: "700",
                   }}
@@ -1134,7 +1134,7 @@ export default function MisOracionesScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <KeyboardAvoidingView
-          behavior="padding"
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
           style={{ flex: 1 }}
         >
           <Pressable
@@ -1449,7 +1449,7 @@ export default function MisOracionesScreen() {
                   style={({ pressed }) => ({
                     backgroundColor:
                       !newPrayer.trim() || addMutation.isPending
-                        ? colors.border
+                        ? colors.chipBg
                         : pressed
                           ? colors.primaryDark
                           : colors.primary,
@@ -1463,7 +1463,7 @@ export default function MisOracionesScreen() {
                   ) : (
                     <Text
                       style={{
-                        color: newPrayer.trim() ? "#ffffff" : colors.muted,
+                        color: newPrayer.trim() ? "#ffffff" : colors.textSecondary,
                         fontSize: 16,
                         fontWeight: "700",
                       }}
