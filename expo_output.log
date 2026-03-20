@@ -1,0 +1,51 @@
+Starting project at /app
+Starting Metro Bundler
+
+The following packages should be updated for best compatibility with the installed expo version:
+  expo-constants@55.0.7 - expected version: ~55.0.9
+  expo-linking@55.0.7 - expected version: ~55.0.8
+  expo-notifications@55.0.12 - expected version: ~55.0.13
+  expo-router@55.0.5 - expected version: ~55.0.7
+  expo-secure-store@55.0.8 - expected version: ~55.0.9
+  expo-splash-screen@55.0.10 - expected version: ~55.0.12
+  expo-web-browser@55.0.9 - expected version: ~55.0.10
+Your project may not work correctly until you install the expected versions of the packages.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 95.0% (2640/2708)
+λ node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 98.6% (2678/2697)
+λ Bundled 3750ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (2718 modules)
+Web Bundled 3884ms node_modules/expo-router/entry.js (2708 modules)
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 56.3% (181/342)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 56.3% ( 446/2328)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓░░░░░░░ 56.3% (1428/2491)
+Web node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 89.6% (2396/2531)
+Web Bundled 17547ms node_modules/expo-router/entry.js (2758 modules)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 105ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 597ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 104ms node_modules/expo-router/entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 100ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 612ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 116ms node_modules/expo-router/entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 68ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 517ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 102ms node_modules/expo-router/entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+λ Bundled 110ms node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server/node/render.js (1 module)
+[expo-notifications] Listening to push token changes is not yet fully supported on web. Adding a listener will have no effect.
+Web Bundled 598ms node_modules/expo-router/entry.js (1 module)
+Web Bundled 101ms node_modules/expo-router/entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console
