@@ -22,9 +22,6 @@ export const DEFAULT_INTERCESORS = [
   "San Judas Tadeo",
 ];
 
-// Keep legacy export for backwards compat
-export const INTERCESORS = DEFAULT_INTERCESORS;
-
 // Default categories for prayer intentions
 export const DEFAULT_CATEGORIES = [
   "Salud",
@@ -33,8 +30,5 @@ export const DEFAULT_CATEGORIES = [
   "Vocación",
   "General",
 ] as const;
-
-// Keep legacy export
-export const CATEGORIES = DEFAULT_CATEGORIES;
 
 export type Category = string;
