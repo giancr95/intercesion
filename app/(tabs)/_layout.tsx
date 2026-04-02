@@ -1,5 +1,6 @@
 import { useAuth } from "@/src/providers/AuthProvider";
 import { useTheme } from "@/src/providers/ThemeProvider";
+import { ErrorBoundary } from "@/src/components/ErrorBoundary";
 import { Tabs, useRouter, useSegments } from "expo-router";
 import { BookHeart, Church, UserCircle } from "lucide-react-native";
 import React, { useEffect } from "react";
@@ -37,6 +38,7 @@ export default function TabLayout() {
   }
 
   return (
+    <ErrorBoundary>
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.tabBarActive,
@@ -92,5 +94,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </ErrorBoundary>
   );
 }

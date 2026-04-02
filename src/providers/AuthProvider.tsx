@@ -3,6 +3,12 @@ import { supabase } from "@/src/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+function toError(e: unknown): Error | null {
+  if (!e) return null;
+  if (e instanceof Error) return e;
+  return new Error(String(e));
+}
+
 interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -46,28 +52,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [saints, setSaints] = useState<string[]>([...DEFAULT_INTERCESORS]);
   const [categories, setCategories] = useState<string[]>([...DEFAULT_CATEGORIES]);
 
-  // Fetch user profile from public.users
   const fetchUserProfile = async (userId: string) => {
     const { data } = await supabase
       .from("users")
       .select("display_name, saints, categories")
       .eq("id", userId)
       .single();
-    if (data?.display_name) {
-      setDisplayName(data.display_name);
-    } else {
-      setDisplayName("Guerrero de Oración");
-    }
-    if (data?.saints && data.saints.length > 0) {
-      setSaints(data.saints);
-    } else {
-      setSaints([...DEFAULT_INTERCESORS]);
-    }
-    if (data?.categories && data.categories.length > 0) {
-      setCategories(data.categories);
-    } else {
-      setCategories([...DEFAULT_CATEGORIES]);
-    }
+    setDisplayName(data?.display_name || "Guerrero de Oración");
+    setSaints(data?.saints?.length ? data.saints : [...DEFAULT_INTERCESORS]);
+    setCategories(data?.categories?.length ? data.categories : [...DEFAULT_CATEGORIES]);
   };
 
   useEffect(() => {
@@ -81,8 +74,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session?.user) fetchUserProfile(session.user.id);
-      else {
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      } else {
         setDisplayName("Guerrero de Oración");
         setSaints([...DEFAULT_INTERCESORS]);
         setCategories([...DEFAULT_CATEGORIES]);
@@ -94,12 +88,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error as Error | null };
+    return { error: toError(error) };
   };
 
   const signUp = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({ email, password });
-    return { error: error as Error | null };
+    return { error: toError(error) };
   };
 
   const signOut = async () => {
@@ -108,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
-    return { error: error as Error | null };
+    return { error: toError(error) };
   };
 
   const updateDisplayName = async (name: string) => {
@@ -118,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .update({ display_name: name })
       .eq("id", session.user.id);
     if (!error) setDisplayName(name);
-    return { error: error as Error | null };
+    return { error: toError(error) };
   };
 
   const updateSaints = async (newSaints: string[]) => {
@@ -128,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .update({ saints: newSaints })
       .eq("id", session.user.id);
     if (!error) setSaints(newSaints);
-    return { error: error as Error | null };
+    return { error: toError(error) };
   };
 
   const updateCategories = async (newCategories: string[]) => {
@@ -138,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .update({ categories: newCategories })
       .eq("id", session.user.id);
     if (!error) setCategories(newCategories);
-    return { error: error as Error | null };
+    return { error: toError(error) };
   };
 
   return (
