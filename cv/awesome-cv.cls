@@ -76,8 +76,21 @@
 % Needed to manage math fonts
 \RequirePackage{unicode-math}
 % Needed to use icons from font-awesome
-\RequirePackage{fontawesome6}
+\RequirePackage{fontawesome5}
 \RequirePackage{accsupp}
+% Compatibility aliases: map FontAwesome 6 names used in this class to FA5 equivalents
+\providecommand{\faSquareWhatsapp}{\faWhatsapp}
+\providecommand{\faCakeCandles}{\faBirthdayCake}
+\providecommand{\faHouseChimney}{\faHome}
+\providecommand{\faSquareGithub}{\faGithubSquare}
+\providecommand{\faSquareXing}{\faXingSquare}
+\providecommand{\faXTwitter}{\faTwitter}
+\providecommand{\faOrcid}{\faOrcid@noop}
+\providecommand{\faOrcid@noop}{\textsc{orcid}}
+\providecommand{\faMastodon}{\faAt}
+\providecommand{\faKaggle}{\faDatabase}
+\providecommand{\faHackerrank}{\faCode}
+\providecommand{\faResearchgate}{\faUniversity}
 \defaultfontfeatures{
   Renderer=HarfBuzz,
 }
