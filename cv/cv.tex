@@ -1,0 +1,88 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% Awesome CV LaTeX Template
+%
+% This template has been downloaded from:
+% https://github.com/posquit0/Awesome-CV
+%
+% Author:
+% Claud D. Park <posquit0.bj@gmail.com>
+% http://www.posquit0.com
+%
+% Customized by: Giancarlo R. Palavicini
+%
+% Template license:
+% CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Configuration
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[11pt, a4paper]{awesome-cv}
+
+%%% Section files directory
+\newcommand*{\sectiondir}{resume/}
+
+%%% Accent color — awesome-red matches engineering/professional tone
+% Options: awesome-emerald, awesome-skyblue, awesome-red, awesome-pink,
+%          awesome-orange, awesome-nephritis, awesome-concrete, awesome-darknight
+\colorlet{awesome}{awesome-red}
+
+%%% Header social separator
+\headersocialsep[\quad\textbar\quad]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{import}
+\usepackage{pdfpages}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Personal Data
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\name{Giancarlo R.}{Palavicini}
+\address{Santo Domingo, Heredia, Costa Rica}
+\mobile{(+506) 8315-6424}
+
+\email{grodriguezpalavicini@gmail.com}
+\linkedin{giancr95}
+
+\position{Ingeniero Mecatrónica{\enskip\cdotp\enskip}Automatización{\enskip\cdotp\enskip}Sistemas Embebidos}
+\quote{``[...] Pero es la ingeniería la que cambia al mundo.''}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Footer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makecvfooter
+  {\today}
+  {Giancarlo R. Palavicini~~~·~~~Résumé}
+  {\thepage}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\makecvheader
+
+\import{\sectiondir}{summary.tex}
+\import{\sectiondir}{education.tex}
+\import{\sectiondir}{experience.tex}
+\import{\sectiondir}{extracurricular.tex}
+\import{\sectiondir}{honors.tex}
+\import{\sectiondir}{writing.tex}
+\import{\sectiondir}{presentation.tex}
+\import{\sectiondir}{references.tex}
+
+%%% Appendix — attached certificates and documents
+\includepdf[pages={1}]{./Anexos/icrega.pdf}
+\includepdf[pages={1}]{./Anexos/AAOP.pdf}
+\includepdf[pages={1,2}]{./Anexos/titulos.pdf}
+\includepdf[pages={1}]{./Anexos/ced.pdf}
+
+\end{document}
